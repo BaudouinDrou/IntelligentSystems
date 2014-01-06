@@ -1,0 +1,7 @@
+.classpath
+.project
+.pydevproject
+*.class
+bin
+log
+log.txt

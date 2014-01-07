@@ -8,6 +8,6 @@ MODE=$4
 NTURN=$5
 MAXT=$6
 
-
+cd IntelligentSystems
 java -jar tools/PlayGame.jar tools/maps/$MAP  "java $PLAYER1 " "java $PLAYER2 " $MODE $NTURN $MAXT   | python tools/visualizer/visualize_locally.py 
 

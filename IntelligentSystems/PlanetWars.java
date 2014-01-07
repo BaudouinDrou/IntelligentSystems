@@ -196,21 +196,21 @@ public class PlanetWars {
     // is left) then that player's number is returned. If there are no
     // remaining players, then the game is a draw and 0 is returned.
     public int Winner() {
-	Set<Integer> remainingPlayers = new TreeSet<Integer>();
-	for (Planet p : planets) {
-	    remainingPlayers.add(p.Owner());
-	}
-	for (Fleet f : fleets) {
-	    remainingPlayers.add(f.Owner());
-	}
-	switch (remainingPlayers.size()) {
-	case 0:
-	    return 0;
-	case 1:
-	    return ((Integer)remainingPlayers.toArray()[0]).intValue();
-	default:
-	    return -1;
-	}
+    	Set<Integer> remainingPlayers = new TreeSet<Integer>();
+    	for (Planet p : planets) {
+    	    remainingPlayers.add(p.Owner());
+    	}
+    	for (Fleet f : fleets) {
+    	    remainingPlayers.add(f.Owner());
+    	}
+    	switch (remainingPlayers.size()) {
+    	case 0:
+    	    return 0;
+    	case 1:
+    	    return ((Integer)remainingPlayers.toArray()[0]).intValue();
+    	default:
+    	    return -1;
+    	}
     }
 
     // Returns the number of ships that the current player has, either located

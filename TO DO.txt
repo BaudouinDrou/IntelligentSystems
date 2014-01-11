@@ -1,0 +1,5 @@
+Visualization 
+Making the bot	(hill climbing)		Baudouin
+Explanation				Anouk
+Result/test bots
+Diary (what we did in PR) (first bot) 	Gossa

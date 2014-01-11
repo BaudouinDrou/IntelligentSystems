@@ -21,7 +21,15 @@ public class FirstBot {
   	}
 
   	public static List<Planet> interestingPlanets(PlanetWars pw){
-  		return pw.EnemyPlanets();
+        List<Planet> asw = new ArrayList<Planet>();
+        for (Planet p : pw.NotMyPlanets()){
+            if (p.NumShips()<p.GrowthRate())
+                asw.add(p);
+        }
+        for (Planet p : pw.EnemyPlanets()){
+            asw.add(p);
+        }
+  		return asw;
   	}
 
 

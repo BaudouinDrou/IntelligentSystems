@@ -7,24 +7,37 @@ import java.util.*;
  Not a very clever bot, but showcases the functions that can be used.
  Overcommented for educational purposes.
  */
-public class FirstBot {
+public class HillclimbingBot {
 
   /*
 	 * Function that gets called every turn. This is where to implement the strategies.
 	 */
-
-  	public static List<Planet> interestingPlanets(PlanetWars pw){
-        List<Planet> asw = new ArrayList<Planet>();
-        for (Planet p : pw.NotMyPlanets()){
-            if (p.NumShips()<p.GrowthRate())
-                asw.add(p);
-        }
-        for (Planet p : pw.EnemyPlanets()){
-            asw.add(p);
-        }
-  		return asw;
-  	}
-
+	 
+	public static int Dcalculation(Planet pA, Planet pB) {
+		int hisLoss = 0;
+		int myLoss = 0;
+		int hisGrowth = 0;
+		int myGrowth = 0;
+		if (Helper.WillCapture(pA,pB)){
+			/* if A capture B */
+			myLoss = pB.NumShips();
+			myGrowth = pB.GrowthRate();
+			if (pB.Owner()!=0) {
+				/* if it is an enemy planet (not neutral)*/
+				hisLoss = pB.NumShips();
+				hisGrowth = - pB.GrowthRate();
+			}
+		}
+		else {
+			/* if A do not win against B */
+			myLoss = pA.NumShips();
+			if (pB.Owner()!=0)
+				hisLoss = pA.NumShips();
+			myGrowth = 0;
+			hisGrowth = 0;
+		}
+		return hisLoss - myLoss + myGrowth - hisGrowth;
+	}
 
 	public static void DoTurn(PlanetWars pw) {
     
@@ -36,32 +49,21 @@ public class FirstBot {
 
     //create a destination planet
 		Planet dest = null;
-
+		int minD = Integer.MIN_VALUE;
+		for (Planet pA : pw.MyPlanets()) {
+			for (Planet pB : pw.NotMyPlanets()) {
+				if (Dcalculation(pA,pB)>minD) {
+					source = pA;
+					dest = pB;
+				}
+			}
+		}
+	
     //(1) implement an algorithm to determine the source planet to send your ships from
-    //Here, we choose the planet with the maximum of ships to send the fleet (not the best strategy)
-    int maxShips = 0;
-    for (Planet p : pw.MyPlanets()){
-        if (p.NumShips() > maxShips){
-            maxShips = p.NumShips();
-            source = p;
-        }
-    }
-    if (source==null){
-        source = pw.MyPlanets().get(0);
-    }
+    //... code here
 
     //(2) implement an algorithm to deterimen the destination planet to send your ships to
-    //Here, we'll pick the first available (=capturable) planet in the list of interesting planets
-    List<Planet> sortedPlanets = interestingPlanets(pw);
-    for (Planet p : sortedPlanets){
-        if (Helper.WillCapture(source,p)){
-            dest = p;
-            break;
-        }
-    }
-    if (dest==null){
-        dest = sortedPlanets.get(0);
-    }
+    //... code here
 
 		//(3) Attack
 		if (source != null && dest != null) {

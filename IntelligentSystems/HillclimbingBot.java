@@ -12,33 +12,6 @@ public class HillclimbingBot {
   /*
 	 * Function that gets called every turn. This is where to implement the strategies.
 	 */
-	 
-	public static int Dcalculation(Planet pA, Planet pB) {
-        // The next values are only relatives value to the global values of grothrates and number of ships
-		int hisLoss = 0;
-		int myLoss = 0;
-		int hisGrowth = 0;
-		int myGrowth = 0;
-		if (Helper.WillCapture(pA,pB)){
-			/* if A capture B */
-			myLoss = pB.NumShips();
-			myGrowth = pB.GrowthRate();
-			if (pB.Owner()!=0) {
-				/* if it is an enemy planet (not neutral)*/
-				hisLoss = pB.NumShips();
-				hisGrowth = - pB.GrowthRate();
-			}
-		}
-		else {
-			/* if A do not win against B */
-			myLoss = pA.NumShips()/2;
-			if (pB.Owner()!=0)
-				hisLoss = pA.NumShips()/2;
-			myGrowth = 0;
-			hisGrowth = 0;
-		}
-		return hisLoss - myLoss + myGrowth - hisGrowth;
-	}
 
 	public static void DoTurn(PlanetWars pw) {
     
@@ -46,17 +19,17 @@ public class HillclimbingBot {
     //if you want to know what this object does, then read PlanetWars.java
 
     //create a source planet, if you want to know what this object does, then read Planet.java
-		Planet source = null;
+		Planet source = pw.MyPlanets().get(0);
 
     //create a destination planet
-		Planet dest = null;
-		int maxD = Integer.MIN_VALUE;
+		Planet dest = pw.MyPlanets().get(0);
+		int maxD = 0;
 		for (Planet pA : pw.MyPlanets()) {
 			for (Planet pB : pw.NotMyPlanets()) {
-				if (Dcalculation(pA,pB)>maxD) {
+				if (Helper.Dcalculation(pA,pB)>maxD) {
 					source = pA;
 					dest = pB;
-                    maxD = Dcalculation(pA,pB);
+                    maxD = Helper.Dcalculation(pA,pB);
 				}
 			}
 		}

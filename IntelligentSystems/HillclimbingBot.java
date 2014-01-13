@@ -14,6 +14,7 @@ public class HillclimbingBot {
 	 */
 	 
 	public static int Dcalculation(Planet pA, Planet pB) {
+        // The next values are only relatives value to the global values of grothrates and number of ships
 		int hisLoss = 0;
 		int myLoss = 0;
 		int hisGrowth = 0;
@@ -30,9 +31,9 @@ public class HillclimbingBot {
 		}
 		else {
 			/* if A do not win against B */
-			myLoss = pA.NumShips();
+			myLoss = pA.NumShips()/2;
 			if (pB.Owner()!=0)
-				hisLoss = pA.NumShips();
+				hisLoss = pA.NumShips()/2;
 			myGrowth = 0;
 			hisGrowth = 0;
 		}
@@ -49,12 +50,13 @@ public class HillclimbingBot {
 
     //create a destination planet
 		Planet dest = null;
-		int minD = Integer.MIN_VALUE;
+		int maxD = Integer.MIN_VALUE;
 		for (Planet pA : pw.MyPlanets()) {
 			for (Planet pB : pw.NotMyPlanets()) {
-				if (Dcalculation(pA,pB)>minD) {
+				if (Dcalculation(pA,pB)>maxD) {
 					source = pA;
 					dest = pB;
+                    maxD = Dcalculation(pA,pB);
 				}
 			}
 		}

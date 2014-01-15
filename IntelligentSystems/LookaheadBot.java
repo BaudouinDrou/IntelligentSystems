@@ -169,6 +169,14 @@ public class LookaheadBot {
 				planets.add(planet);
 			}
 		}
+
+		public SimulatedPlanetWars(SimulatedPlanetWars simpw) {
+
+			for (Planet planet: simpw.Planets()){
+				planets.add(planet);
+			}
+
+		}
 		
 		public void simulateGrowth() {
 			for (Planet p: planets){
@@ -254,6 +262,42 @@ public class LookaheadBot {
 				}
 				
 			}
+			
+			// (3) Simulate attack
+			if (source != null && dest != null) {
+				simulateAttack(2, source, dest);
+			}
+
+		}
+		
+		
+		public void simulateFirstBotAttack(){
+			Planet source = null;
+			Planet dest = null;
+
+	        int maxShips = 0;
+	        for (Planet p : pw.MyPlanets()){
+	            if (p.NumShips() > maxShips){
+	                maxShips = p.NumShips();
+	                source = p;
+	            }
+	        }
+	        if (source==null){
+	            source = pw.MyPlanets().get(0);
+	        }
+	    
+	        //(2) implement an algorithm to deterimen the destination planet to send your ships to
+	        //Here, we'll pick the first available (=capturable) planet in the list of interesting planets
+	        List<Planet> sortedPlanets = interestingPlanets(pw);
+	        for (Planet p : sortedPlanets){
+	            if (Helper.WillCapture(source,p)){
+	                dest = p;
+	                break;
+	            }
+	        }
+	        if (dest==null){
+	            dest = sortedPlanets.get(0);
+	        }
 			
 			// (3) Simulate attack
 			if (source != null && dest != null) {

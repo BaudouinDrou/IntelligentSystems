@@ -19,33 +19,74 @@ public class BeamsearchBot {
 
 	public static void DoTurn(PlanetWars pw) {
 		
-		SimulatedPlanetWars simpw = createSimulation(pw);
-		MyNode root = new MyNode(simpw);
-		root.createSons();
-
-		// This is the array containing the 3 best options
-		Array<MyNode> beam = new Array<MyNode>(3);
-		beam[0] = root;
-		Timer t = new Timer(4, go(beam,pw));	//Until the time come to play
+		int score = Integer.MIN_VALUE;		
 		Planet source = null;
 		Planet dest = null;
+	
+		
+		// We try to simulate each possible action and its outcome after two turns
+		// considering each of my planets as a possible source 
+		// and each enemy planet as a possible destination
+		for (Planet myPlanet: pw.MyPlanets()){
+			
+			//avoid planets with only one ship
+			if (myPlanet.NumShips() <= 1)
+				continue;		
+			
+			for (Planet notMyPlanet: pw.NotMyPlanets()){
 
-		while(true) {
-
-		}
-	}
-
-	// Analyse the situation and act belonging to the current situation
-	public static void go(Array<MyNode> beam, PlanetWars pw){
-		MyNode max = beam[0];
-
-		for (int i = 1; i<beam.length; ++i){
-			if (beam[i].getValue()>max.getValue()){
-				max = beam[i];
+				// Create simulation environment - need to create one for each simulation
+				SimulatedPlanetWars simpw = createSimulation(pw);
+				
+				// (1) simulate my turn with the current couple of source and destination
+				int scoreMax = Helper.Dcalculation(myPlanet, notMyPlanet);
+								
+				// (6) find the planet with the maximum evaluated score
+				//     this is the most promising future state
+				if (scoreMax > score) {					
+					score = scoreMax;
+					source = myPlanet;
+					dest = notMyPlanet;
+				}
 			}
 		}
-		pw.IssueOrder(max.getSource(),max.getDest());
+		
+		
+			
+		// Attack using the source and destinations that lead to the most promising state in the simulation
+		if (source != null && dest != null) {
+			pw.IssueOrder(source, dest);
+		}
+		
+
 	}
+	
+	
+	/**
+	 * This function evaluates how promising a simulated state is.
+	 * You can change it to anything that makes sense, using combinations 
+	 * of number of planets, ships or growth rate.
+	 * @param SimulatedPlanetWars pw
+	 * @return score of the final state of the simulation
+	 */
+	public static double evaluateState(SimulatedPlanetWars pw){
+		
+		// CHANGE HERE
+		
+		double enemyShips = 1.0;
+		double myShips = 1.0;
+		
+		for (Planet planet: pw.EnemyPlanets()){
+			enemyShips += planet.NumShips();
+		}
+		
+		for (Planet planet: pw.MyPlanets()){
+			myShips += planet.NumShips();
+		}
+		
+		return myShips/enemyShips;
+	}
+	
 
 	
 	// don't change this
@@ -98,5 +139,217 @@ public class BeamsearchBot {
 	 */
 	static LookaheadBot dummyBot = new LookaheadBot();
 	
-}
+	/**
+	 * Class which provide the simulation environment, has same interface as PlanetWars 
+	 * (except for Fleets, that are not used).
+	 *
+	 */
+	public class SimulatedPlanetWars{
 
+		List<Planet> planets = new ArrayList<Planet>();
+		
+		public SimulatedPlanetWars(PlanetWars pw) {
+
+			for (Planet planet: pw.Planets()){
+				planets.add(planet);
+			}
+		}
+		
+		public void simulateGrowth() {
+			for (Planet p: planets){
+				
+				if(p.Owner() == 0)
+					continue;
+				
+				Planet newp = new Planet(p.PlanetID(), p.Owner(), p.NumShips()+p.GrowthRate() , 
+						p.GrowthRate(), p.X(), p.Y());
+				
+				planets.set(p.PlanetID(), newp);
+			}
+		}
+		
+		public void simulateAttack( int player, Planet source, Planet dest){
+			
+			if (source.Owner() != player){
+				return;
+			}
+			
+			
+			// Simulate attack
+			if (source != null && dest != null) {
+						
+				Planet newSource = new Planet(source.PlanetID(), source.Owner(), source.NumShips()/2 , 
+						source.GrowthRate(), source.X(), source.Y());
+				Planet newDest = new Planet(dest.PlanetID(), dest.Owner(), Math.abs(dest.NumShips()-source.NumShips()/2 ), 
+						dest.GrowthRate(), dest.X(), dest.Y());
+				
+				if(dest.NumShips()< source.NumShips()/2){
+					//change owner
+					newDest.Owner(player);
+				}
+				
+				planets.set(source.PlanetID(), newSource);
+				planets.set(dest.PlanetID(), newDest);
+			}
+
+
+		}
+		
+		public void simulateAttack( Planet source, Planet dest){
+			simulateAttack(1, source, dest);
+		}
+		
+		
+		public void simulateFirstBotAttack(){
+            //create a source planet, if you want to know what this object does, then read Planet.java
+            Planet source = null;
+    
+            //create a destination planet
+            Planet dest = null;
+    
+            //(1) implement an algorithm to determine the source planet to send your ships from
+            //Here, we choose the planet with the maximum of ships to send the fleet (not the best strategy)
+            int maxShips = 0;
+            for (Planet p : pw.MyPlanets()){
+                if (p.NumShips() > maxShips){
+                    maxShips = p.NumShips();
+                    source = p;
+                }
+            }
+            if (source==null){
+                source = pw.MyPlanets().get(0);
+            }
+        
+            //(2) implement an algorithm to deterimen the destination planet to send your ships to
+            //Here, we'll pick the first available (=capturable) planet in the list of interesting planets
+            List<Planet> sortedPlanets = interestingPlanets(pw);
+            for (Planet p : sortedPlanets){
+                if (Helper.WillCapture(source,p)){
+                    dest = p;
+                    break;
+                }
+            }
+            if (dest==null){
+                dest = sortedPlanets.get(0);
+            }
+			
+			// (3) Simulate attack
+			if (source != null && dest != null) {
+				simulateAttack(2, source, dest);
+			}
+
+		}
+		
+		public List<Planet> Planets(){
+			return planets;
+		}
+		
+	    // Returns the number of planets. Planets are numbered starting with 0.
+	    public int NumPlanets() {
+	    	return planets.size();
+	    }
+		
+	    // Returns the planet with the given planet_id. There are NumPlanets()
+	    // planets. They are numbered starting at 0.
+	    public Planet GetPlanet(int planetID) {
+	    	return planets.get(planetID);
+	    }
+	    
+	    // Return a list of all the planets owned by the current player. By
+	    // convention, the current player is always player number 1.
+	    public List<Planet> MyPlanets() {
+			List<Planet> r = new ArrayList<Planet>();
+			for (Planet p : planets) {
+			    if (p.Owner() == 1) {
+				r.add(p);
+			    }
+			}
+			return r;
+	    }
+	    
+	    // Return a list of all neutral planets.
+	    public List<Planet> NeutralPlanets() {
+		List<Planet> r = new ArrayList<Planet>();
+		for (Planet p : planets) {
+		    if (p.Owner() == 0) {
+			r.add(p);
+		    }
+		}
+		return r;
+	    }
+
+	    // Return a list of all the planets owned by rival players. This excludes
+	    // planets owned by the current player, as well as neutral planets.
+	    public List<Planet> EnemyPlanets() {
+		List<Planet> r = new ArrayList<Planet>();
+		for (Planet p : planets) {
+		    if (p.Owner() >= 2) {
+			r.add(p);
+		    }
+		}
+		return r;
+	    }
+
+	    // Return a list of all the planets that are not owned by the current
+	    // player. This includes all enemy planets and neutral planets.
+	    public List<Planet> NotMyPlanets() {
+		List<Planet> r = new ArrayList<Planet>();
+		for (Planet p : planets) {
+		    if (p.Owner() != 1) {
+			r.add(p);
+		    }
+		}
+		return r;
+	    }
+	    
+	    // Returns the distance between two planets, rounded up to the next highest
+	    // integer. This is the number of discrete time steps it takes to get
+	    // between the two planets.
+		public int Distance(int sourcePlanet, int destinationPlanet) {
+			Planet source = planets.get(sourcePlanet);
+			Planet destination = planets.get(destinationPlanet);
+			double dx = source.X() - destination.X();
+			double dy = source.Y() - destination.Y();
+			return (int) Math.ceil(Math.sqrt(dx * dx + dy * dy));
+		}
+	    
+	    // If the game is not yet over (ie: at least two players have planets or
+	    // fleets remaining), returns -1. If the game is over (ie: only one player
+	    // is left) then that player's number is returned. If there are no
+	    // remaining players, then the game is a draw and 0 is returned.
+		public int Winner() {
+			Set<Integer> remainingPlayers = new TreeSet<Integer>();
+			for (Planet p : planets) {
+				remainingPlayers.add(p.Owner());
+			}
+			switch (remainingPlayers.size()) {
+			case 0:
+				return 0;
+			case 1:
+				return ((Integer) remainingPlayers.toArray()[0]).intValue();
+			default:
+				return -1;
+			}
+		}
+
+	    // Returns the number of ships that the current player has, either located
+	    // on planets or in flight.
+	    public int NumShips(int playerID) {
+		int numShips = 0;
+		for (Planet p : planets) {
+		    if (p.Owner() == playerID) {
+			numShips += p.NumShips();
+		    }
+		}
+		return numShips;
+	    }
+
+	    
+
+	    public void IssueOrder(Planet source, Planet dest) {
+	    	simulateAttack(source,dest);
+	    }
+	    
+	
+	}
+}

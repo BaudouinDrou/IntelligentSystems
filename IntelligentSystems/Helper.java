@@ -42,4 +42,8 @@ public class Helper {
 		return hisLoss - myLoss + myGrowth - hisGrowth;
 	}
 	
+	public static void futureFunction() {
+	
+	}
+	
 }

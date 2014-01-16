@@ -24,24 +24,25 @@ public class BeamsearchBot {
 		root.createSons();
 
 		// This is the array containing the 3 best options
-		Array<MyNode> beam = new Array<MyNode>(3);
-		beam[0] = root;
-		Timer t = new Timer(4, go(beam,pw));	//Until the time come to play
+		ArrayList<MyNode> beam = new ArrayList<MyNode>();
+		beam.add(root);
 		Planet source = null;
 		Planet dest = null;
 
-		while(true) {
-
+		int iter = 0;
+		while(iter < 150) {
+			++ iter;
 		}
+		go(beam,pw);
 	}
 
 	// Analyse the situation and act belonging to the current situation
-	public static void go(Array<MyNode> beam, PlanetWars pw){
-		MyNode max = beam[0];
+	public static void go(ArrayList<MyNode> beam, PlanetWars pw){
+		MyNode max = beam.get(0);
 
-		for (int i = 1; i<beam.length; ++i){
-			if (beam[i].getValue()>max.getValue()){
-				max = beam[i];
+		for (int i = 1; i<beam.size(); ++i){
+			if (beam.get(i).getValue()>max.getValue()){
+				max = beam.get(i);
 			}
 		}
 		pw.IssueOrder(max.getSource(),max.getDest());
@@ -89,7 +90,7 @@ public class BeamsearchBot {
 	 * @return SimulatedPlanetWars instance on which to simulate your attacks. Create a new one everytime you want to try alternative simulations.
 	 */
 	public static SimulatedPlanetWars createSimulation(PlanetWars pw){
-		return dummyBot.new SimulatedPlanetWars(pw);
+		return new SimulatedPlanetWars(pw);
 	}
 	
 	

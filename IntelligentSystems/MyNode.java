@@ -1,8 +1,10 @@
+import java.util.*;
+
 // This class is made to get a structure for our nodes in our trees
 
 public class MyNode {
 	private MyNode father;
-	private List<MyNode> sons;
+	private ArrayList<MyNode> sons;
 	private SimulatedPlanetWars simpw;
 
 	private int value;
@@ -11,7 +13,7 @@ public class MyNode {
 
 	public MyNode(SimulatedPlanetWars simpw){	//Usefull to define the root
 		this.father = null;
-		this.sons = new List<MyNode>();
+		this.sons = new ArrayList<MyNode>();
 		this.simpw = simpw;
 		this.value = 0;
 		this.source = null;
@@ -20,7 +22,7 @@ public class MyNode {
 
 	public MyNode(MyNode father, SimulatedPlanetWars simpw, int value, Planet source, Planet dest){	//Usefull to instanciate the sons of the current node
 		this.father = father;
-		this.sons = new List<MyNode>();
+		this.sons = new ArrayList<MyNode>();
 		this.simpw = simpw;
 		this.value = value;
 		this.source = source;
@@ -31,7 +33,7 @@ public class MyNode {
 		return this.father;
 	}
 
-	public List<MyNode> getSons(){
+	public ArrayList<MyNode> getSons(){
 		return this.sons;
 	}
 
@@ -51,7 +53,7 @@ public class MyNode {
 		return this.dest;
 	}
 
-	public void setSons(List<MyNode> sons){
+	public void setSons(ArrayList<MyNode> sons){
 		this.sons = sons;
 	}
 
@@ -92,20 +94,41 @@ public class MyNode {
 			for (Planet notMyPlanet: this.getSim().NotMyPlanets()){
 
 				// Create simulation environment for this son
-				SimulatedPlanetWars simpw2 = createSimulation(simpw);
+				SimulatedPlanetWars simpw2 = new SimulatedPlanetWars(simpw);
 				int value = Helper.Dcalculation(myPlanet, notMyPlanet);
-				simpw2.issueOrder(myPlanet, notMyPlanet);
-				simpw2.simulateGroth();
+				simpw2.IssueOrder(myPlanet, notMyPlanet);
+				simpw2.simulateGrowth();
 				simpw2.simulateFirstBotAttack();
-				simpw2.simulateGroth();
+				simpw2.simulateGrowth();
 
+				MyNode son;
 				if (this.getFather().isRoot()) {
-					MyNode son = new MyNode(this, simpw2, value, myPlanet, notMyPlanet);
+					son = new MyNode(this, simpw2, value, myPlanet, notMyPlanet);
 				}
 				else {
-					MyNode son = new MyNode(this, simpw2, value, this.getSource(), this.getDest());	// We only need to know from where to where we want to sen our ships to get the best turn
+					son = new MyNode(this, simpw2, value, this.getSource(), this.getDest());	// We only need to know from where to where we want to send our ships to get the best turn
 				}
 				this.addSon(son);
+			}
+		}
+	}
+
+	public void conditionnalAdd(int n, ArrayList<MyNode> list){
+		if (list.size()<n)
+			list.add(this);
+		else {
+			int min = list.get(0).getValue();
+			int index = 0;
+			for (int i = 0;i<list.size();++i){
+				MyNode node = list.get(i);
+				if (node.getValue()<min) {
+					index = i;
+					min = node.getValue();
+				}
+			}
+			if (this.getValue()>min) {
+				list.remove(index);
+				list.add(this);
 			}
 		}
 	}

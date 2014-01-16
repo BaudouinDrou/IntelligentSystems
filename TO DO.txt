@@ -1,5 +1,6 @@
 Visualization 
 Making the bot	(hill climbing)		Baudouin
+	Add Iterator function on nodes
 Explanation				Anouk
 Result/test bots
 Diary (what we did in PR) (first bot) 	Gossa

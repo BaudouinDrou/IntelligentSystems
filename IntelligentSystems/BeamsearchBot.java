@@ -1,57 +1,60 @@
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.*;
 
-/** Another smarter kind of bot, which implements a minimax algorithm with look-ahead of two turns.
- * It simulates the opponent using the BullyBot strategy and simulates the possible outcomes for any
- * choice of source and destination planets in the attack. The simulated outcome states are ranked by
- * the evaluation function, which returns the most promising one.
- * 
- * Try to improve this bot. For example, you can try to answer some of this questions. 
- * Can you come up with smarter heuristics/scores for the evaluation function? 
- * What happens if you run this bot against your bot from week1? 
- * How can you change this bot to beat your week1 bot? 
- * Can you extend the bot to look ahead more than two turns? How many turns do you want to look ahead?
- * Is there a smart way to make this more efficient?
- */
+/*
+ RandomBot - an example bot that picks up one of his planets and send half of the ships 
+ from that planet to a random target planet.
 
-public class BeamsearchBot {
+ Not a very clever bot, but showcases the functions that can be used.
+ Overcommented for educational purposes.
+ */
+public class BeamsearchBot2 {
+
+  /*
+	 * Function that gets called every turn. This is where to implement the strategies.
+	 */
 
 	public static void DoTurn(PlanetWars pw) {
-		
-		SimulatedPlanetWars simpw = createSimulation(pw);
-		MyNode root = new MyNode(simpw);
-		root.createSons();
-
-		// This is the array containing the 3 best options
-		ArrayList<MyNode> beam = new ArrayList<MyNode>();
-		beam.add(root);
+		// long endingTime = System.currentTimeMillis() + 5;
+		int testIndex = 0;
 		Planet source = null;
 		Planet dest = null;
 
-		int iter = 0;
-		while(iter < 150) {
-			++ iter;
+		MyNode root = new MyNode(new SimulatedPlanetWars(pw));
+
+		ArrayList<MyNode> beam = new ArrayList<MyNode>();
+		beam.add(root);
+		//While there is still some time, we go through the tree of possibilities
+		while(testIndex < 20){
+			for (int i = 0;i<beam.size();++i){
+				MyNode node = beam.get(i);
+				node.createSons();
+				for (MyNode son : node.getSons())
+					son.conditionnalAdd(3,beam);
+				beam.remove(i);	//When it has been treated, we take it off the list
+			}
+			++ testIndex;
 		}
-		go(beam,pw);
-	}
 
-	// Analyse the situation and act belonging to the current situation
-	public static void go(ArrayList<MyNode> beam, PlanetWars pw){
-		MyNode max = beam.get(0);
+		// Choosing the maximum value 
 
-		for (int i = 1; i<beam.size(); ++i){
-			if (beam.get(i).getValue()>max.getValue()){
-				max = beam.get(i);
+		int max = beam.get(0).getValue();
+		int index = 0;
+		for (int i = 1;i<beam.size();++i){
+			MyNode node = beam.get(i);
+			if (node.getValue()>max) {
+				index = i;
+				max = node.getValue();
 			}
 		}
-		pw.IssueOrder(max.getSource(),max.getDest());
+    
+		//End of turn : attack
+		if (source != null && dest != null) {
+			pw.IssueOrder(source, dest);
+		}
+		
 	}
 
-	
-	// don't change this
 	public static void main(String[] args) {
-		
 		String line = "";
 		String message = "";
 		int c;
@@ -75,29 +78,7 @@ public class BeamsearchBot {
 				}
 			}
 		} catch (Exception e) {
-			StringWriter writer = new StringWriter();
-			e.printStackTrace(new PrintWriter(writer));
-			String stackTrace = writer.toString();
-			System.err.println(stackTrace);
-			System.exit(1); //just stop now. we've got a problem
+
 		}
 	}
-	
-	/**
-	 * Create the simulation environment. Returns a SimulatedPlanetWars instance.
-	 * Call every time you want a new simulation environment.
-	 * @param The original PlanetWars object
-	 * @return SimulatedPlanetWars instance on which to simulate your attacks. Create a new one everytime you want to try alternative simulations.
-	 */
-	public static SimulatedPlanetWars createSimulation(PlanetWars pw){
-		return new SimulatedPlanetWars(pw);
-	}
-	
-	
-	/**
-	 * Static LookaheadBot, used only to access SimulatedPlanetWars (DON'T CHANGE)
-	 */
-	static LookaheadBot dummyBot = new LookaheadBot();
-	
 }
-

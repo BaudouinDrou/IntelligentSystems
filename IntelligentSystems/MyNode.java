@@ -33,7 +33,7 @@ public class MyNode {
 		return this.father;
 	}
 
-	public ArrayList<MyNode> getSons(){
+	public List<MyNode> getSons(){
 		return this.sons;
 	}
 
@@ -69,6 +69,14 @@ public class MyNode {
 		this.dest = dest;
 	}
 
+	public String toString(){
+		String asw = "";
+		asw += "Value : " + this.getValue() + "; ";
+		asw += "Source : " + this.getSource() + "; ";
+		asw += "Dest : " + this.getDest() + "; ";
+		return asw;
+	}
+
 	// Other get/set function, in case of
 	public void addSon(MyNode son){
 		this.sons.add(son);
@@ -84,14 +92,15 @@ public class MyNode {
 
 	// Add each possible state in the currentNode.sons list.
 	public void createSons(){
-		for (Planet myPlanet: this.getSim().MyPlanets()){
+		SimulatedPlanetWars simpw = this.getSim();
+		for (Planet myPlanet: simpw.MyPlanets()){
 			
 			//avoid planets with only one ship
 			if (myPlanet.NumShips() <= 1)
 				continue;
 			
 			// We create a son for each of the possible situations
-			for (Planet notMyPlanet: this.getSim().NotMyPlanets()){
+			for (Planet notMyPlanet: simpw.NotMyPlanets()){
 
 				// Create simulation environment for this son
 				SimulatedPlanetWars simpw2 = new SimulatedPlanetWars(simpw);
@@ -117,17 +126,16 @@ public class MyNode {
 		if (list.size()<n)
 			list.add(this);
 		else {
-			int min = list.get(0).getValue();
-			int index = 0;
-			for (int i = 0;i<list.size();++i){
-				MyNode node = list.get(i);
+			MyNode minRef = list.get(0);
+			int min = minRef.getValue();
+			for (MyNode node : list){
 				if (node.getValue()<min) {
-					index = i;
+					minRef = node;
 					min = node.getValue();
 				}
 			}
 			if (this.getValue()>min) {
-				list.remove(index);
+				list.remove(minRef);
 				list.add(this);
 			}
 		}

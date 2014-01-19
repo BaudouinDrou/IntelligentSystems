@@ -7,7 +7,7 @@ import java.util.*;
  Not a very clever bot, but showcases the functions that can be used.
  Overcommented for educational purposes.
  */
-public class BeamsearchBot2 {
+public class BeamsearchBot {
 
   /*
 	 * Function that gets called every turn. This is where to implement the strategies.
@@ -23,35 +23,40 @@ public class BeamsearchBot2 {
 
 		ArrayList<MyNode> beam = new ArrayList<MyNode>();
 		beam.add(root);
+		// for (MyNode node : root.getSons())
+		// 	System.out.println("I'm a node of " + node);
+
+		source = root.getSource();
+		dest = root.getDest();
 		//While there is still some time, we go through the tree of possibilities
-		while(testIndex < 20){
-			for (int i = 0;i<beam.size();++i){
-				MyNode node = beam.get(i);
-				node.createSons();
-				for (MyNode son : node.getSons())
-					son.conditionnalAdd(3,beam);
-				beam.remove(i);	//When it has been treated, we take it off the list
+		while(testIndex < 1){
+			for (MyNode node : beam){	// CURRENT BUG : cannot reach node functions, weird
+				// node.createSons();
+				System.out.println(node);
+				// for (MyNode son : node.getSons()){
+				// 	son.conditionnalAdd(3,beam);
+				// }
+				// beam.remove(node);	//When it has been treated, we take it off the list
 			}
 			++ testIndex;
 		}
 
 		// Choosing the maximum value 
 
-		int max = beam.get(0).getValue();
-		int index = 0;
-		for (int i = 1;i<beam.size();++i){
-			MyNode node = beam.get(i);
-			if (node.getValue()>max) {
-				index = i;
-				max = node.getValue();
-			}
-		}
+		// int max = beam.get(0).getValue();
+		// int index = 0;
+		// for (int i = 1;i<beam.size();++i){
+		// 	MyNode node = beam.get(i);
+		// 	if (node.getValue()>max) {
+		// 		index = i;
+		// 		max = node.getValue();
+		// 	}
+		// }
     
 		//End of turn : attack
 		if (source != null && dest != null) {
 			pw.IssueOrder(source, dest);
 		}
-		
 	}
 
 	public static void main(String[] args) {

@@ -58,6 +58,6 @@ public class Helper {
     }
     
     public static void main(String[] args) {
-    	SimulatedPlanetWars simpw = Helper.fakePW();
+    	SimulatedPlanetWars simpw = fakePW();
     }
 }

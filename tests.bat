@@ -3,6 +3,6 @@
 cd IntelligentSystems
 
 javac *.java
-java Helper.java
+java Helper
 
 @PAUSE

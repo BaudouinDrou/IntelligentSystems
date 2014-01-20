@@ -4,18 +4,21 @@ public class SimulatedPlanetWars{
 	List<Planet> planets = new ArrayList<Planet>();
 	
 	public SimulatedPlanetWars(PlanetWars pw) {
-
 		for (Planet planet: pw.Planets()){
 			planets.add(planet);
 		}
 	}
 
 	public SimulatedPlanetWars(SimulatedPlanetWars simpw) {
-
 		for (Planet planet: simpw.Planets()){
 			planets.add(planet);
 		}
-
+	}
+	
+	public SimulatedPlanetWars(List<Planet> list){
+		for (Planet planet: list){
+			planets.add(planet);
+		}		 
 	}
 	
 	public void simulateGrowth() {

@@ -41,5 +41,20 @@ public class Helper {
 		}
 		return hisLoss - myLoss + myGrowth - hisGrowth;
 	}
+    
+    public static SimulatedPlanetWars fakePW(){
+    	List<Planet> asw = new ArrayList<Planet>(6);
+    	for (int i = 0; i<3; ++i){
+    		Planet a = new Planet(i*2,i,3,5);
+    		Planet b = new Planet(i*2+1,i,10,4);
+    		asw.add(a);
+    		asw.add(b);
+    	}
+    	return new SimulatedPlanetWars(asw);
+    }
+    
+    public static void main(String[] args) {
+    	SimulatedPlanetWars simpw = Helper.fakePW();
+    }
 	
 }

@@ -99,7 +99,7 @@ public class MyNode {
 	}
 
 	// Add each possible state in the currentNode.sons list.
-	public void createSons(){
+	public void createSons(){	// Tested
 		SimulatedPlanetWars simpw = this.getSim();
 		for (Planet myPlanet: simpw.MyPlanets()){
 			
@@ -125,9 +125,7 @@ public class MyNode {
 				else {
 					son = new MyNode(this, simpw2, value, this.getSource(), this.getDest());	// We only need to know from where to where we want to send our ships to get the best turn
 				}
-                /*
-				this.addSon(son);
-                */
+                this.addSon(son);                
 			}
 		}
 	}

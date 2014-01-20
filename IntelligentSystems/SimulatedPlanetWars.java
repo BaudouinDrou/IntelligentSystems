@@ -126,7 +126,8 @@ public class SimulatedPlanetWars{
             }
         }
         if (source==null){
-            source = this.EnemyPlanets().get(0);
+        	if (!this.EnemyPlanets().isEmpty())
+            	source = this.EnemyPlanets().get(0);
         }
     
         //(2) implement an algorithm to determine the destination planet to send your ships to

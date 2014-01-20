@@ -59,5 +59,8 @@ public class Helper {
     
     public static void main(String[] args) {
     	SimulatedPlanetWars simpw = fakePW();
+        MyNode root = new MyNode(simpw);
+        root.createSons();
+        System.out.println(root);
     }
 }

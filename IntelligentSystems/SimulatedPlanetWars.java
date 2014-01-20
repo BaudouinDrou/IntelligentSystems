@@ -264,4 +264,13 @@ public class SimulatedPlanetWars{
     public void IssueOrder(Planet source, Planet dest) {
     	simulateAttack(source,dest);
     }
+    
+    public String toString(){
+        String asw = "";
+        for (Planet p : this.planets) {
+            asw += "Owner : " + p.Owner() + ".";
+            asw += "Number of ships : " + p.NumShips() + ".\n";
+        }
+        return asw;
+    }
 }

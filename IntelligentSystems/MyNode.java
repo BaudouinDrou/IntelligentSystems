@@ -8,6 +8,7 @@ public class MyNode {
 	private SimulatedPlanetWars simpw;
 
 	private int value;
+    private int depth;
 	private Planet source;
 	private Planet dest;
 
@@ -16,6 +17,7 @@ public class MyNode {
 		this.sons = new ArrayList<MyNode>();
 		this.simpw = simpw;
 		this.value = 0;
+        this.depth = 0;
 		this.source = null;
 		this.dest = null;
 	}
@@ -25,6 +27,7 @@ public class MyNode {
 		this.sons = new ArrayList<MyNode>();
 		this.simpw = simpw;
 		this.value = value;
+        this.depth = father.getDepth() + 1;
 		this.source = source;
 		this.dest = dest;
 	}
@@ -44,6 +47,10 @@ public class MyNode {
 	public int getValue(){
 		return this.value;
 	}
+                                     
+    public int getDepth(){
+        return this.depth;
+    }
 
 	public Planet getSource(){
 		return this.source;
@@ -71,9 +78,10 @@ public class MyNode {
 
 	public String toString(){
 		String asw = "";
-		asw += "Value : " + this.getValue() + "; ";
+		asw += "Value : " + this.getValue() + ", ";
+		asw += "Depth : " + this.getDepth() + "; ";
 		asw += "Source : " + this.getSource() + "; ";
-		asw += "Dest : " + this.getDest() + "; ";
+		asw += "Dest : " + this.getDest() + ", ";
 		return asw;
 	}
 
@@ -105,19 +113,21 @@ public class MyNode {
 				// Create simulation environment for this son
 				SimulatedPlanetWars simpw2 = new SimulatedPlanetWars(simpw);
 				int value = Helper.Dcalculation(myPlanet, notMyPlanet);
-				simpw2.IssueOrder(myPlanet, notMyPlanet);
+                simpw2.IssueOrder(myPlanet, notMyPlanet);
 				simpw2.simulateGrowth();
 				simpw2.simulateFirstBotAttack();
-				simpw2.simulateGrowth();
+				simpw2.simulateGrowth(); 
 
 				MyNode son;
-				if (this.getFather().isRoot()) {
+				if (this.isRoot()) {
 					son = new MyNode(this, simpw2, value, myPlanet, notMyPlanet);
 				}
 				else {
 					son = new MyNode(this, simpw2, value, this.getSource(), this.getDest());	// We only need to know from where to where we want to send our ships to get the best turn
 				}
+                /*
 				this.addSon(son);
+                */
 			}
 		}
 	}

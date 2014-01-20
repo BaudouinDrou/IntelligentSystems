@@ -44,11 +44,15 @@ public class Helper {
     
     public static SimulatedPlanetWars fakePW(){
     	List<Planet> asw = new ArrayList<Planet>(6);
+    	double x = -5;
+    	double y = -10;
     	for (int i = 0; i<3; ++i){
-    		Planet a = new Planet(i*2,i,3,5);
-    		Planet b = new Planet(i*2+1,i,10,4);
+    		Planet a = new Planet(i*2,i,3,5,x*i,y*i);
+    		Planet b = new Planet(i*2+1,i,10,4,-x*i,-y*i);
     		asw.add(a);
     		asw.add(b);
+    		x *= -1;
+    		y *= -1;
     	}
     	return new SimulatedPlanetWars(asw);
     }
@@ -56,5 +60,4 @@ public class Helper {
     public static void main(String[] args) {
     	SimulatedPlanetWars simpw = Helper.fakePW();
     }
-	
 }

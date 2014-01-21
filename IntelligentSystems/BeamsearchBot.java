@@ -56,7 +56,7 @@ public class BeamsearchBot {
 			}
 		}
 
-		// Choosing destination and source from the maximum value of D found in the beam array
+		// Choosing destination and source from the maximum value of D found in the beam array+
 		source = beam.get(index).getSource();
 		dest = beam.get(index).getDest();
 

@@ -29,12 +29,14 @@ public class BeamsearchBot {
 		source = root.getSource();
 		dest = root.getDest();
 		//While there is still some time, we go through the tree of possibilities
-		while(testIndex < 100){
+		while(testIndex < 10){
 			for (int i = 0; i<beam.size();++i){
 				MyNode node = beam.get(i);
-				beam.remove(i);		//When it has been treated, we take it off the list
 				node.createSons();
-				System.out.println(node);
+				if (!node.isLeave()){
+					beam.remove(i);		//When it has been treated, we take it off the list	only if it not a leave (prevent thus an empty bem array)				
+				}
+				// System.out.println("Beam size 1 : " + beam.size());
 				for (MyNode son : node.getSons()){
 					son.conditionnalAdd(3,beam);
 				}
@@ -52,6 +54,15 @@ public class BeamsearchBot {
 				index = i;
 				max = node.getValue();
 			}
+		}
+
+		// Choosing destination and source from the maximum value of D found in the beam array
+		source = beam.get(index).getSource();
+		dest = beam.get(index).getDest();
+
+		// (3) Attack!
+		if (source != null && dest != null) {
+			pw.IssueOrder(source, dest);
 		}
 	}
 

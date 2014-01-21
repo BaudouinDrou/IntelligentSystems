@@ -70,43 +70,45 @@ public class Helper {
 
 		// // BeamsearchBot.DoTurn(simpw); => not working (cf signature of the function) :
 
-		// int testIndex = 0;
-		// Planet source = null;
-		// Planet dest = null;
+		int testIndex = 0;
+		Planet source = null;
+		Planet dest = null;
 
-		// MyNode root = new MyNode(simpw);
+		MyNode root = new MyNode(simpw);
 
-		// ArrayList<MyNode> beam = new ArrayList<MyNode>(3);
-		// beam.add(root);
-		// // for (MyNode node : root.getSons())
-		// // 	System.out.println("I'm a node of " + node);
+		ArrayList<MyNode> beam = new ArrayList<MyNode>(3);
+		beam.add(root);
+		// for (MyNode node : root.getSons())
+		// 	System.out.println("I'm a node of " + node);
 
-		// source = root.getSource();
-		// dest = root.getDest();
-		// //While there is still some time, we go through the tree of possibilities
-		// while(testIndex < 100){
-		// 	for (int i = 0; i<beam.size();++i){
-		// 		MyNode node = beam.get(i);
-		// 		beam.remove(i);		//When it has been treated, we take it off the list
-		// 		node.createSons();
-		// 		System.out.println(node);
-		// 		for (MyNode son : node.getSons()){
-		// 			son.conditionnalAdd(3,beam);
-		// 		}
-		// 	}
-		// 	++ testIndex;
-		// }
+		source = root.getSource();
+		dest = root.getDest();
+		//While there is still some time, we go through the tree of possibilities
+		while(testIndex < 400){
+			for (int i = 0; i<beam.size();++i){
+				MyNode node = beam.get(i);
+				node.createSons();
+				if (!node.isLeave()){
+					beam.remove(i);		//When it has been treated, we take it off the list	only if it not a leave (prevent thus an empty bem array)				
+				}
+				// System.out.println("Beam size 1 : " + beam.size());
+				for (MyNode son : node.getSons()){
+					son.conditionnalAdd(5,beam);
+				}
+			}
+			++ testIndex;
+		}
 
-		// // Choosing the maximum value 
+		// Choosing the maximum value 
 
-		// int max = beam.get(0).getValue();
-		// int index = 0;
-		// for (int i = 1;i<beam.size();++i){
-		// 	MyNode node = beam.get(i);
-		// 	if (node.getValue()>max) {
-		// 		index = i;
-		// 		max = node.getValue();
-		// 	}
-		// }
+		int max = beam.get(0).getValue();
+		int index = 0;
+		for (int i = 1;i<beam.size();++i){
+			MyNode node = beam.get(i);
+			if (node.getValue()>max) {
+				index = i;
+				max = node.getValue();
+			}
+		}
     }
 }

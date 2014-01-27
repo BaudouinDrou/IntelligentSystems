@@ -1,5 +1,7 @@
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.*;
 
 /* A bot which adapts its behaviour according to the environment characteristics.
@@ -32,91 +34,114 @@ public class MyAdaptiveBot {
 				
 		//Retrieve environment characteristics
 		//Are there characteristics you want to use instead, or are there more you'd like to use? Try it out!
-		int neutralPlanets = pw.NeutralPlanets().size();
-		int totalPlanetSize = 0;
-		for (Planet p : pw.NeutralPlanets()) {
-			totalPlanetSize += p.GrowthRate();
-		}
-		int averagePlanetSize = Math.round(totalPlanetSize/pw.NeutralPlanets().size());
-			
-		//Use AdaptivityMap to get the bot which matches the current environment characteristics  
-		String thisTurnBot = MyAdaptivityMap.get(neutralPlanets, averagePlanetSize);
+		// int neutralPlanets = pw.NeutralPlanets().size();
+		// int totalPlanetSize = 0;
+		// for (Planet p : pw.NeutralPlanets()) {
+		// 	totalPlanetSize += p.GrowthRate();
+		// }
+		// int averagePlanetSize = Math.round(totalPlanetSize/pw.NeutralPlanets().size());
 		
-		if (thisTurnBot == null) {
-			System.err.println("WARNING: You have not entered bot data for this case. Using default bot");
-			DoRandomBotTurn(pw);
-		} else {
-			if (thisTurnBot.equals("BullyBot")) {
-				System.err.println("BullyBot is going to play this turn");
-				DoBullyBotTurn(pw);
-			} else if (thisTurnBot.equals("RandomBot")) {
-				System.err.println("RandomBot is going to play this turn");
-				DoRandomBotTurn(pw);
-			} else {
-				System.err.println("WARNING: Adaptivity map wants " + thisTurnBot +
-									" to play this turn, but this strategy is not implemented in this bot! Using default bot");
-				DoRandomBotTurn(pw);
+		int planets = pw.MyPlanets().size() - pw.EnemyPlanets().size();	// myPlanets - EnemyPlanets => positive mean that I have more planets than the enemy
+		int ships = Helper.shipsValue(pw);								// myShips - enemyShips
+		int growth = Helper.growthValue(pw);							// myGrowth - enemyGrowth		
+		int fleet = Helper.fleetValue(pw);								// The maximum fleet able to be send minus the average fleet on each planet.
+
+		int planetsL = 0;	// L is for learn (to modify the if depending on victories or defeats)
+		int shipsL = 0;
+		int growthL = 0;		
+		int fleetL = 0;
+
+		try {	// Try to read values from the file
+			BufferedReader reader = new BufferedReader(new FileReader("learn.txt"));
+			String line = null;
+
+			line = reader.readLine();
+			planetsL = Integer.valueOf(line);
+			line = reader.readLine();
+			shipsL = Integer.valueOf(line);
+			line = reader.readLine();
+			growthL = Integer.valueOf(line);
+			line = reader.readLine();
+			fleetL = Integer.valueOf(line);
+		}
+		catch (Exception e){
+			// File must not exist or being inconsistent so we create it
+			try {
+				PrintWriter writer = new PrintWriter("learn.txt", "UTF-8");
+				writer.println(0);
+				writer.println(0);
+				writer.println(0);
+				writer.println(0);
+				writer.close();
+			}
+			catch (Exception ee){
+				System.out.println(ee);
+			}
+			// Finally throw an exception : 
+			System.out.println(e);
+		}
+
+		// Tree selection :
+		if (Helper.testRand(planets,planetsL))	{
+			// Learn values are at 0 by default, but can be changed when stored
+			// Here if planets < planetsL (= 0 if nothing learned yet)
+			// In case of equal the value is choosen randomly
+			if (Helper.testRand(ships,shipsL))
+				defend(pw);
+			else
+				attack(pw);
+		}
+		else {
+			if (Helper.testRand(growth,growthL)){
+				if (Helper.testRand(fleet,fleetL))
+					defend(pw);
+				else
+					attack(pw);
+			}
+			else {
+				if (Helper.testRand(ships,shipsL)){
+					if (Helper.testRand(fleet,fleetL))
+						defend(pw);
+					else
+						attack(pw);
+				}
+				else
+					attack(pw);
 			}
 		}
 	}
 	
-	/**
-	 * Implementation of the bullybot strategy (copy pasted from the regular BullyBot.java)
-	 * @param pw
-	 */
-	public static void DoBullyBotTurn(PlanetWars pw) {
+	public static void attack(PlanetWars pw) {
 		Planet source = null;
-		double sourceScore = Double.MIN_VALUE;
-		//Select my strongest planet to send ships from
-		for (Planet myPlanet : pw.MyPlanets()) {
-			if (myPlanet.NumShips() <= 1)
-				continue;
-			double score = (double) myPlanet.NumShips();
-			if (score > sourceScore) {
-				sourceScore = score;
-				source = myPlanet;
-			}
-		}
-		
 		Planet dest = null;
-		double destScore = Double.MAX_VALUE;
-		//Select weakest destination planet
-		for (Planet notMyPlanet : pw.NotMyPlanets()) {
-			double score = (double) (notMyPlanet.NumShips());
 
-			if (score < destScore) {
-				destScore = score;
-				dest = notMyPlanet;
-			}
-		}
-		
+		// Planet pGR = attackForGR();
+		// Planet pDist = attackForDcalcDist();
+		// Planet pShips = attackForShips();
+		// Planet pEnemy = attackOnEnemy();
+
+		source = pw.MyPlanets().get(0);
+		dest = pw.NotMyPlanets().get(0);
+
 		if (source != null && dest != null) {
 			pw.IssueOrder(source, dest);
 		}
 	}
-	
-	/**
-	 * Implementation of the RandomBot strategy (copy pasted from the regular RandomBot.java)
-	 * @param pw
-	 */
-	public static void DoRandomBotTurn(PlanetWars pw) {
 
-		Random random = new Random();
-		
+	public static void defend(PlanetWars pw) {	//send ships from the lowest growing planet to the best one
+		int maxGR = 0;
+		int minGR = 5;
 		Planet source = null;
-		List<Planet> myPlanets = pw.MyPlanets();
-		//Randomly select source planet
-		if (myPlanets.size() > 0) {
-			Integer randomSource = random.nextInt(myPlanets.size());
-			source = myPlanets.get(randomSource);
-		}
-		
 		Planet dest = null;
-		List<Planet> allPlanets = pw.NotMyPlanets();
-		//Randomly select destication planets
-		if (allPlanets.size() > 0) {
-			Integer randomTarget = random.nextInt(allPlanets.size());
-			dest = allPlanets.get(randomTarget);
+		for (Planet p : pw.MyPlanets()){
+			if (p.GrowthRate()>maxGR){
+				maxGR = p.GrowthRate();
+				dest = p;
+			}
+			if (p.GrowthRate()<minGR){
+				minGR = p.GrowthRate();
+				source = p;
+			}
 		}
 
 		if (source != null && dest != null) {

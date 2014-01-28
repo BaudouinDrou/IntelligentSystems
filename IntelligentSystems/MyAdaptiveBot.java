@@ -89,43 +89,141 @@ public class MyAdaptiveBot {
 			if (Helper.testRand(ships,shipsL))
 				defend(pw);
 			else
-				attack(pw);
+				attack(pw,1);	// 1 is for "planet attack"
 		}
 		else {
 			if (Helper.testRand(growth,growthL)){
 				if (Helper.testRand(fleet,fleetL))
 					defend(pw);
 				else
-					attack(pw);
+					attack(pw,0);	// 0 is for "GR attack"
 			}
 			else {
 				if (Helper.testRand(ships,shipsL)){
 					if (Helper.testRand(fleet,fleetL))
 						defend(pw);
 					else
-						attack(pw);
+						attack(pw,2);	// 2 is for destroying the ennemy ships to prevent him to conquer any of our planets
 				}
 				else
-					attack(pw);
+					attack(pw,3);	// 3 is for an attack that makes an overall winning (Dcalculation + distance)
 			}
 		}
 	}
 	
-	public static void attack(PlanetWars pw) {
+	public static void attack(PlanetWars pw, int objective) {	// Objective is 0 GR, 1 planet, 2 ships, 3 Dcal + distance
 		Planet source = null;
 		Planet dest = null;
+		List<Planet> asw;
 
-		// Planet pGR = attackForGR();
-		// Planet pDist = attackForDcalcDist();
-		// Planet pShips = attackForShips();
-		// Planet pEnemy = attackOnEnemy();
-
-		source = pw.MyPlanets().get(0);
-		dest = pw.NotMyPlanets().get(0);
+		switch (objective){
+			case 0 : asw = forGR(pw);
+				break;
+			case 1 : asw = forPlanet(pw);
+				break;
+			case 2 : asw = forShips(pw);
+				break;
+			default : asw = forDcalcDist(pw);
+				break;
+		}
+		source = asw.get(0);
+		dest = asw.get(1);
 
 		if (source != null && dest != null) {
 			pw.IssueOrder(source, dest);
 		}
+	}
+
+	// Those four next functions are build to generate a source and a destination for a special kind of attack
+
+	public static ArrayList<Planet> forGR(PlanetWars pw){
+		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		// Find the biggest fleet to attack with
+		int maxShips = 0;
+		for (Planet p : pw.MyPlanets()){
+			if (p.NumShips() > maxShips){
+				maxShips = p.NumShips();
+				asw.add(0,p);
+			}
+		}
+		// Find the destination with best growthRate to be captured
+		int maxGR = 0;
+		for (Planet p : pw.NotMyPlanets()){
+			if (p.GrowthRate() > maxGR && Helper.WillCapture(asw.get(0),p)) {
+				maxGR = p.GrowthRate();
+				asw.add(1,p);
+			}
+		}
+
+		return asw;
+	}
+
+	public static ArrayList<Planet> forPlanet(PlanetWars pw){
+		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		// Find the biggest fleet to attack with 
+		int maxShips = 0;
+		for (Planet p : pw.MyPlanets()){
+			if (p.NumShips() > maxShips){
+				maxShips = p.NumShips();
+				asw.add(0,p);
+			}
+		}
+		// Find the destination with best distance to be captured (distance help to be sure to capture the planet on neutral ones)
+		int maxDist = 0;
+		for (Planet p : pw.NotMyPlanets()){
+			int dist = (int) Helper.distance(asw.get(0),p);
+			if (dist > maxDist && Helper.WillCapture(asw.get(0),p)) {
+				maxDist = dist;
+				asw.add(1,p);
+			}
+		}
+		return asw;
+	}
+
+	public static ArrayList<Planet> forShips(PlanetWars pw){
+		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		// Find the biggest fleet to attack with and our weakest planet to know what is our goal of fleet to be destroyed in the enemey
+		int maxShips = 0;
+		int minShips = 1000;
+		for (Planet p : pw.MyPlanets()){
+			int ships = p.NumShips();
+			if (ships > maxShips){
+				maxShips = ships;
+				asw.add(0,p);
+			}
+			if (ships< minShips)
+				minShips = ships;
+		}
+		// Find the destination with a dangerous fleet
+		int maxDist = 0;
+		maxShips = 0;
+		for (Planet p : pw.NotMyPlanets()){
+			int ships = p.NumShips();
+			if ((ships/2)>minShips && ships>maxShips) {
+				// We choose the biggest Enemy to attack to defend more our planets
+				maxShips = ships;
+			}
+		}
+		return asw;
+	}
+
+	public static ArrayList<Planet> forDcalcDist(PlanetWars pw){
+		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+
+		// Find the best couple source/destination relying on Dcalculation + distance (our heurisctic function)
+		int heurisctic = -1024;
+		for (Planet s : pw.MyPlanets()) {
+			for (Planet d : pw.NotMyPlanets()){
+				int dist = (int) Helper.distance(s,d);
+				int dCalc = Helper.Dcalculation(s,d);
+				if (dist + dCalc > heurisctic) {
+					heurisctic = dist + dCalc;
+					asw.add(0,s);
+					asw.add(1,d);
+				}
+			}
+		}
+		return asw;
 	}
 
 	public static void defend(PlanetWars pw) {	//send ships from the lowest growing planet to the best one

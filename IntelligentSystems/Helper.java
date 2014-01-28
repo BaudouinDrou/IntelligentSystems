@@ -67,37 +67,37 @@ public class Helper {
     public static double distance(Planet a,Planet b){
     	// return the square of the distance (too expensive to calculate the square root)
     	return Math.pow((a.X()-b.X()),2) + Math.pow((a.Y()-b.Y()),2);
-    }
+	}
 
-    public static int shipsValue(PlanetWars pw){
-    	// return the difference between the enemy and our own number of ships in total
-    	int myShips = 0;
-    	int enemyShips = 0;
-    	for (Planet p : pw.Planets()){
-    		if(p.Owner()==1)
-    			myShips += p.NumShips();
-    		if(p.Owner()==2)
-    			enemyShips += p.NumShips();
-    	}
-    	return myShips - enemyShips;
-    }
+	public static int shipsValue(PlanetWars pw){
+		// return the difference between the enemy and our own number of ships in total
+		int myShips = 0;
+		int enemyShips = 0;
+		for (Planet p : pw.Planets()){
+			if(p.Owner()==1)
+				myShips += p.NumShips();
+			if(p.Owner()==2)
+				enemyShips += p.NumShips();
+		}
+		return myShips - enemyShips;
+	}
 
-    public static int growthValue(PlanetWars pw){
-    	// return the difference between the enemy and our own groth rate
-    	int myGrowth = 0;
-    	int enemyGrowth = 0;
-    	for (Planet p : pw.Planets()){
-    		if(p.Owner()==1)
-    			myGrowth += p.GrowthRate();
-    		if(p.Owner()==2)
-    			enemyGrowth += p.GrowthRate();
-    	}
-    	return myGrowth - enemyGrowth;
-    }
+	public static int growthValue(PlanetWars pw){
+		// return the difference between the enemy and our own groth rate
+		int myGrowth = 0;
+		int enemyGrowth = 0;
+		for (Planet p : pw.Planets()){
+			if(p.Owner()==1)
+				myGrowth += p.GrowthRate();
+			if(p.Owner()==2)
+				enemyGrowth += p.GrowthRate();
+		}
+		return myGrowth - enemyGrowth;
+	}
 
-    public static int fleetValue(PlanetWars pw){
-    	// return the maximum fleet able to be send minus the average fleet on each planet.
-    	// if aswer > 0 means that our biggest fleet is twice as big as the average number of ships on our planets.
+	public static int fleetValue(PlanetWars pw){
+		// return the maximum fleet able to be send minus the average fleet on each planet.
+		// if aswer > 0 means that our biggest fleet is twice as big as the average number of ships on our planets.
 		int maxShips = 0;
 		int fleet = 0;
 		for (Planet p : pw.MyPlanets()){
@@ -107,7 +107,49 @@ public class Helper {
 			fleet += p.NumShips();
 		}
 		return maxShips/2 - fleet/pw.MyPlanets().size();
-    }
+	}
+
+	public static int shipsValue(SimulatedPlanetWars pw){
+		// return the difference between the enemy and our own number of ships in total
+		int myShips = 0;
+		int enemyShips = 0;
+		for (Planet p : pw.Planets()){
+			if(p.Owner()==1)
+				myShips += p.NumShips();
+			if(p.Owner()==2)
+				enemyShips += p.NumShips();
+		}
+		return myShips - enemyShips;
+	}
+
+	public static int growthValue(SimulatedPlanetWars pw){
+		// return the difference between the enemy and our own groth rate
+		int myGrowth = 0;
+		int enemyGrowth = 0;
+		for (Planet p : pw.Planets()){
+			if(p.Owner()==1)
+				myGrowth += p.GrowthRate();
+			if(p.Owner()==2)
+				enemyGrowth += p.GrowthRate();
+		}
+		return myGrowth - enemyGrowth;
+	}
+
+	public static int fleetValue(SimulatedPlanetWars pw){
+		// return the maximum fleet able to be send minus the average fleet on each planet.
+		// if aswer > 0 means that our biggest fleet is twice as big as the average number of ships on our planets.
+		int maxShips = 0;
+		int fleet = 0;
+		int numOfPlanets = 0;
+		for (Planet p : pw.MyPlanets()){
+			if (p.NumShips() > maxShips){
+				maxShips = p.NumShips();
+			}
+			fleet += p.NumShips();
+			++ numOfPlanets;
+		}
+		return maxShips/2 - fleet/numOfPlanets;
+	}
 
     public static boolean testRand(int a, int b){
     	if (a==b){
@@ -173,5 +215,8 @@ public class Helper {
 
 		// // distance test
 		// System.out.println(Helper.distance(simpw.Planets().get(2),simpw.Planets().get(5)));
+
+		// // testing Defend function from adaptive bot :
+		MyAdaptiveBot.forShips(simpw);
     }
 }

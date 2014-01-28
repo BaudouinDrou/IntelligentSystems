@@ -24,14 +24,13 @@ import java.util.*;
  * Implement the bot strategies you used to fill AdaptivityMap.java here as well.
  */
 
-public class MyAdaptiveBot {
+public class SimMyAdaptiveBot {
 	
 	/**
 	 * The main method for issuing your commands. Here, the best strategy is selected depending on the environment characteristics
-	 * @param pw
+	 * @param simpw
 	 */
-	public static void DoTurn(PlanetWars pw) {
-		// Tested
+	public static void DoTurn(SimulatedPlanetWars simpw) {
 				
 		//Retrieve environment characteristics
 		//Are there characteristics you want to use instead, or are there more you'd like to use? Try it out!
@@ -42,10 +41,10 @@ public class MyAdaptiveBot {
 		// }
 		// int averagePlanetSize = Math.round(totalPlanetSize/pw.NeutralPlanets().size());
 		
-		int planets = pw.MyPlanets().size() - pw.EnemyPlanets().size();	// myPlanets - EnemyPlanets => positive mean that I have more planets than the enemy
-		int ships = Helper.shipsValue(pw);								// myShips - enemyShips
-		int growth = Helper.growthValue(pw);							// myGrowth - enemyGrowth		
-		int fleet = Helper.fleetValue(pw);								// The maximum fleet able to be send minus the average fleet on each planet.
+		int planets = simpw.MyPlanets().size() - simpw.EnemyPlanets().size();	// myPlanets - EnemyPlanets => positive mean that I have more planets than the enemy
+		int ships = Helper.shipsValue(simpw);								// myShips - enemyShips
+		int growth = Helper.growthValue(simpw);							// myGrowth - enemyGrowth		
+		int fleet = Helper.fleetValue(simpw);								// The maximum fleet able to be send minus the average fleet on each planet.
 
 		int planetsL = 0;	// L is for learn (to modify the if depending on victories or defeats)
 		int shipsL = 0;
@@ -82,60 +81,56 @@ public class MyAdaptiveBot {
 			System.out.println(e);
 		}
 
-		/////////////////////
 		// Tree selection :
-		////////////////////
-
 		if (Helper.testRand(planets,planetsL))	{
 			// Learn values are at 0 by default, but can be changed when stored
 			// Here if planets < planetsL (= 0 if nothing learned yet)
 			// In case of equal the value is choosen randomly
 			if (Helper.testRand(ships,shipsL))
-				defend(pw);
+				defend(simpw);
 			else
-				attack(pw,1);	// 1 is for "planet attack"
+				attack(simpw,1);	// 1 is for "planet attack"
 		}
 		else {
 			if (Helper.testRand(growth,growthL)){
 				if (Helper.testRand(fleet,fleetL))
-					defend(pw);
+					defend(simpw);
 				else
-					attack(pw,0);	// 0 is for "GR attack"
+					attack(simpw,0);	// 0 is for "GR attack"
 			}
 			else {
 				if (Helper.testRand(ships,shipsL)){
 					if (Helper.testRand(fleet,fleetL))
-						defend(pw);
+						defend(simpw);
 					else
-						attack(pw,2);	// 2 is for destroying the ennemy ships to prevent him to conquer any of our planets
+						attack(simpw,2);	// 2 is for destroying the ennemy ships to prevent him to conquer any of our planets
 				}
 				else
-					attack(pw,3);	// 3 is for an attack that makes an overall winning (Dcalculation + distance)
+					attack(simpw,3);	// 3 is for an attack that makes an overall winning (Dcalculation + distance)
 			}
 		}
 	}
 	
-	public static void attack(PlanetWars pw, int objective) {	// Objective is 0 GR, 1 planet, 2 ships, 3 Dcal + distance
-		// Tested
+	public static void attack(SimulatedPlanetWars simpw, int objective) {	// Objective is 0 GR, 1 planet, 2 ships, 3 Dcal + distance
 		Planet source = null;
 		Planet dest = null;
 		List<Planet> asw;
 
 		switch (objective){
-			case 0 : asw = forGR(pw);
+			case 0 : asw = forGR(simpw);
 				break;
-			case 1 : asw = forPlanet(pw);
+			case 1 : asw = forPlanet(simpw);
 				break;
-			case 2 : asw = forShips(pw);
+			case 2 : asw = forShips(simpw);
 				break;
-			default : asw = forDcalcDist(pw);
+			default : asw = forDcalcDist(simpw);
 				break;
 		}
 		source = asw.get(0);
 		dest = asw.get(1);
 
 		if (source != null && dest != null) {
-			pw.IssueOrder(source, dest);
+			simpw.IssueOrder(source, dest);
 		}
 
 		updateLearning(objective);
@@ -143,12 +138,11 @@ public class MyAdaptiveBot {
 
 	// Those four next functions are build to generate a source and a destination for a special kind of attack
 
-	public static ArrayList<Planet> forGR(PlanetWars pw){
-		// Tested
+	public static ArrayList<Planet> forGR(SimulatedPlanetWars simpw){
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
 		// Find the biggest fleet to attack with
 		int maxShips = 0;
-		for (Planet p : pw.MyPlanets()){
+		for (Planet p : simpw.MyPlanets()){
 			if (p.NumShips() > maxShips){
 				maxShips = p.NumShips();
 				asw.add(0,p);
@@ -156,7 +150,7 @@ public class MyAdaptiveBot {
 		}
 		// Find the destination with best growthRate to be captured
 		int maxGR = 0;
-		for (Planet p : pw.NotMyPlanets()){
+		for (Planet p : simpw.NotMyPlanets()){
 			if (p.GrowthRate() > maxGR && Helper.WillCapture(asw.get(0),p)) {
 				maxGR = p.GrowthRate();
 				asw.add(1,p);
@@ -166,12 +160,11 @@ public class MyAdaptiveBot {
 		return asw;
 	}
 
-	public static ArrayList<Planet> forPlanet(PlanetWars pw){
-		// Tested
+	public static ArrayList<Planet> forPlanet(SimulatedPlanetWars simpw){
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
 		// Find the biggest fleet to attack with 
 		int maxShips = 0;
-		for (Planet p : pw.MyPlanets()){
+		for (Planet p : simpw.MyPlanets()){
 			if (p.NumShips() > maxShips){
 				maxShips = p.NumShips();
 				asw.add(0,p);
@@ -179,28 +172,22 @@ public class MyAdaptiveBot {
 		}
 		// Find the destination with best distance to be captured (distance help to be sure to capture the planet on neutral ones)
 		int maxDist = 0;
-		try {
-			for (Planet p : pw.NotMyPlanets()){
-				int dist = (int) Helper.distance(asw.get(0),p);
-				if (dist > maxDist && Helper.WillCapture(asw.get(0),p)) {
-					maxDist = dist;
-					asw.add(1,p);
-				}
+		for (Planet p : simpw.NotMyPlanets()){
+			int dist = (int) Helper.distance(asw.get(0),p);
+			if (dist > maxDist && Helper.WillCapture(asw.get(0),p)) {
+				maxDist = dist;
+				asw.add(1,p);
 			}
-		}
-		catch (Exception e){
-			System.out.println(e);
 		}
 		return asw;
 	}
 
-	public static ArrayList<Planet> forShips(PlanetWars pw){
-		// Tested
+	public static ArrayList<Planet> forShips(SimulatedPlanetWars simpw){
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
 		// Find the biggest fleet to attack with and our weakest planet to know what is our goal of fleet to be destroyed in the enemey
 		int maxShips = 0;
 		int minShips = 1000;
-		for (Planet p : pw.MyPlanets()){
+		for (Planet p : simpw.MyPlanets()){
 			int ships = p.NumShips();
 			if (ships > maxShips){
 				maxShips = ships;
@@ -212,7 +199,7 @@ public class MyAdaptiveBot {
 		// Find the destination with a dangerous fleet
 		int maxDist = 0;
 		maxShips = 0;
-		for (Planet p : pw.NotMyPlanets()){
+		for (Planet p : simpw.NotMyPlanets()){
 			int ships = p.NumShips();
 			if ((ships/2)>minShips && ships>maxShips) {
 				// We choose the biggest Enemy to attack to defend more our planets
@@ -222,42 +209,13 @@ public class MyAdaptiveBot {
 		return asw;
 	}
 
-	public static ArrayList<Planet> forShips(SimulatedPlanetWars pw){
-		// Tested
-		ArrayList<Planet> asw = new ArrayList<Planet>(2);
-		// Find the biggest fleet to attack with and our weakest planet to know what is our goal of fleet to be destroyed in the enemey
-		int maxShips = 0;
-		int minShips = 1000;
-		for (Planet p : pw.MyPlanets()){
-			int ships = p.NumShips();
-			if (ships > maxShips){
-				maxShips = ships;
-				asw.add(0,p);
-			}
-			if (ships< minShips)
-				minShips = ships;
-		}
-		// Find the destination with a dangerous fleet
-		int maxDist = 0;
-		maxShips = 0;
-		for (Planet p : pw.NotMyPlanets()){
-			int ships = p.NumShips();
-			if ((ships/2)>minShips && ships>maxShips) {
-				// We choose the biggest Enemy to attack to defend more our planets
-				maxShips = ships;
-			}
-		}
-		return asw;
-	}
-
-	public static ArrayList<Planet> forDcalcDist(PlanetWars pw){
-		// Tested
+	public static ArrayList<Planet> forDcalcDist(SimulatedPlanetWars simpw){
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
 
 		// Find the best couple source/destination relying on Dcalculation + distance (our heurisctic function)
 		int heurisctic = -1024;
-		for (Planet s : pw.MyPlanets()) {
-			for (Planet d : pw.NotMyPlanets()){
+		for (Planet s : simpw.MyPlanets()) {
+			for (Planet d : simpw.NotMyPlanets()){
 				int dist = (int) Helper.distance(s,d);
 				int dCalc = Helper.Dcalculation(s,d);
 				if (dist + dCalc > heurisctic) {
@@ -270,26 +228,25 @@ public class MyAdaptiveBot {
 		return asw;
 	}
 
-	public static void defend(PlanetWars pw) {	//send ships from the lowest growing planet to the best one
+	public static void defend(SimulatedPlanetWars simpw) {	//send ships from the lowest growing planet to the best one
 		// Tested
 		int maxGR = 0;
 		int minGR = 5;
 		Planet source = null;
 		Planet dest = null;
-		for (Planet p : pw.MyPlanets()){
-			int gr = p.GrowthRate();
-			if (gr>maxGR){
-				maxGR = gr;
+		for (Planet p : simpw.MyPlanets()){
+			if (p.GrowthRate()>maxGR){
+				maxGR = p.GrowthRate();
 				dest = p;
 			}
-			if (gr<minGR){
-				minGR = gr;
+			if (p.GrowthRate()<minGR){
+				minGR = p.GrowthRate();
 				source = p;
 			}
 		}
 
 		if (source != null && dest != null) {
-			pw.IssueOrder(source, dest);
+			simpw.IssueOrder(source, dest);
 		}
 
 		updateLearning(-1);
@@ -310,35 +267,15 @@ public class MyAdaptiveBot {
 			int fleetL = Integer.valueOf(line);
 
 			switch (action){
-				case -1 :	// Defend
-					--planetsL;
-					--growthL;
-					--shipsL;
-					++fleetL;
+				case -1 : --planetsL;
 					break;
-				case 0 :	// GR
-					++planetsL;
-					--growthL;
-					// shipsL;
-					++fleetL;
+				case 0 : --growthL;
 					break;
-				case 1 : 	// Planet
-					++planetsL;
-					++growthL;
-					--shipsL;
-					--fleetL;
+				case 1 : ++planetsL;
 					break;
-				case 2 :	// Ships
-					++planetsL;
-					--growthL;
-					--shipsL;
-					++fleetL;
+				case 2 : --shipsL;
 					break;
-				case 3 : 	// Dcalc + Dist
-					--planetsL;
-					++growthL;
-					++shipsL;
-					--fleetL;
+				case 3 : ++fleetL;
 					break;
 				default : break;
 			}
@@ -356,39 +293,6 @@ public class MyAdaptiveBot {
 		}
 		catch (Exception e){
 			System.out.println(e);
-		}
-	}
-
-
-	public static void main(String[] args) {
-		String line = "";
-		String message = "";
-		int c;
-		try {
-			while ((c = System.in.read()) >= 0) {
-				switch (c) {
-				case '\n':
-					if (line.equals("go")) {
-						PlanetWars pw = new PlanetWars(message);
-						DoTurn(pw);
-						pw.FinishTurn();
-						message = "";
-					} else {
-						message += line + "\n";
-					}
-					line = "";
-					break;
-				default:
-					line += (char) c;
-					break;
-				}
-			}
-		} catch (Exception e) {
-			StringWriter writer = new StringWriter();
-			e.printStackTrace(new PrintWriter(writer));
-			String stackTrace = writer.toString();
-			System.err.println(stackTrace);
-			System.exit(1); //just stop now. we've got a problem
 		}
 	}
 }

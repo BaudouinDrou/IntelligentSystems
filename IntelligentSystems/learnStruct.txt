@@ -1,0 +1,4 @@
+Planets value
+Ships value
+Growthrate value
+Fleet value

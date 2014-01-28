@@ -152,6 +152,8 @@ public class Helper {
 	}
 
     public static boolean testRand(int a, int b){
+    	// Return a<b with randomness if a==b
+
     	if (a==b){
 	    	if(Math.random()<0.5)	// randomly choose another difference
 				++ a;
@@ -217,6 +219,6 @@ public class Helper {
 		// System.out.println(Helper.distance(simpw.Planets().get(2),simpw.Planets().get(5)));
 
 		// // testing Defend function from adaptive bot :
-		MyAdaptiveBot.forShips(simpw);
+		// MyAdaptiveBot.forGR(simpw);
     }
 }

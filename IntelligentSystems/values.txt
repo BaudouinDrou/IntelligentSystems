@@ -1,0 +1,4 @@
+Planets : -4
+Ships : -75
+Growth : -4
+Fleet : -3

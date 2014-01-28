@@ -64,6 +64,13 @@ public class MyAdaptiveBot {
 			growthL = Integer.valueOf(line);
 			line = reader.readLine();
 			fleetL = Integer.valueOf(line);
+
+			PrintWriter writer = new PrintWriter("values.txt", "UTF-8");
+			writer.println("Planets : " + planets);
+			writer.println("Ships : " + ships);
+			writer.println("Growth : " + growth);
+			writer.println("Fleet : " + fleet);
+			writer.close();
 		}
 		catch (Exception e){
 			// File must not exist or being inconsistent so we create it
@@ -89,7 +96,7 @@ public class MyAdaptiveBot {
 		if (Helper.testRand(planets,planetsL))	{
 			// Learn values are at 0 by default, but can be changed when stored
 			// Here if planets < planetsL (= 0 if nothing learned yet)
-			// In case of equal the value is choosen randomly
+			// In case of equality the value is choosen randomly
 			if (Helper.testRand(ships,shipsL))
 				defend(pw);
 			else
@@ -137,7 +144,6 @@ public class MyAdaptiveBot {
 		if (source != null && dest != null) {
 			pw.IssueOrder(source, dest);
 		}
-
 		updateLearning(objective);
 	}
 
@@ -146,6 +152,8 @@ public class MyAdaptiveBot {
 	public static ArrayList<Planet> forGR(PlanetWars pw){
 		// Tested
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		asw.add(null);
+		asw.add(null);
 		// Find the biggest fleet to attack with
 		int maxShips = 0;
 		for (Planet p : pw.MyPlanets()){
@@ -169,6 +177,8 @@ public class MyAdaptiveBot {
 	public static ArrayList<Planet> forPlanet(PlanetWars pw){
 		// Tested
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		asw.add(null);
+		asw.add(null);
 		// Find the biggest fleet to attack with 
 		int maxShips = 0;
 		for (Planet p : pw.MyPlanets()){
@@ -197,34 +207,8 @@ public class MyAdaptiveBot {
 	public static ArrayList<Planet> forShips(PlanetWars pw){
 		// Tested
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
-		// Find the biggest fleet to attack with and our weakest planet to know what is our goal of fleet to be destroyed in the enemey
-		int maxShips = 0;
-		int minShips = 1000;
-		for (Planet p : pw.MyPlanets()){
-			int ships = p.NumShips();
-			if (ships > maxShips){
-				maxShips = ships;
-				asw.add(0,p);
-			}
-			if (ships< minShips)
-				minShips = ships;
-		}
-		// Find the destination with a dangerous fleet
-		int maxDist = 0;
-		maxShips = 0;
-		for (Planet p : pw.NotMyPlanets()){
-			int ships = p.NumShips();
-			if ((ships/2)>minShips && ships>maxShips) {
-				// We choose the biggest Enemy to attack to defend more our planets
-				maxShips = ships;
-			}
-		}
-		return asw;
-	}
-
-	public static ArrayList<Planet> forShips(SimulatedPlanetWars pw){
-		// Tested
-		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		asw.add(null);
+		asw.add(null);
 		// Find the biggest fleet to attack with and our weakest planet to know what is our goal of fleet to be destroyed in the enemey
 		int maxShips = 0;
 		int minShips = 1000;
@@ -253,6 +237,8 @@ public class MyAdaptiveBot {
 	public static ArrayList<Planet> forDcalcDist(PlanetWars pw){
 		// Tested
 		ArrayList<Planet> asw = new ArrayList<Planet>(2);
+		asw.add(null);
+		asw.add(null);
 
 		// Find the best couple source/destination relying on Dcalculation + distance (our heurisctic function)
 		int heurisctic = -1024;
@@ -311,34 +297,34 @@ public class MyAdaptiveBot {
 
 			switch (action){
 				case -1 :	// Defend
-					--planetsL;
-					--growthL;
-					--shipsL;
-					++fleetL;
+					// ++planetsL;
+					// --growthL;
+					// --shipsL;
+					// ++fleetL;
 					break;
 				case 0 :	// GR
-					++planetsL;
-					--growthL;
+					// --planetsL;
+					// --growthL;
 					// shipsL;
-					++fleetL;
+					// ++fleetL;
 					break;
 				case 1 : 	// Planet
-					++planetsL;
-					++growthL;
-					--shipsL;
-					--fleetL;
+					// --planetsL;
+					// ++growthL;
+					// --shipsL;
+					// --fleetL;
 					break;
 				case 2 :	// Ships
-					++planetsL;
-					--growthL;
-					--shipsL;
-					++fleetL;
+					// --planetsL;
+					// --growthL;
+					// --shipsL;
+					// ++fleetL;
 					break;
 				case 3 : 	// Dcalc + Dist
-					--planetsL;
-					++growthL;
-					++shipsL;
-					--fleetL;
+					// ++planetsL;
+					// ++growthL;
+					// ++shipsL;
+					// --fleetL;
 					break;
 				default : break;
 			}

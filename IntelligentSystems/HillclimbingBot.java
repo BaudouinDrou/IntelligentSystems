@@ -29,7 +29,7 @@ public class HillclimbingBot {
 				if (Helper.Dcalculation(pA,pB)>maxD) {
 					source = pA;
 					dest = pB;
-                    maxD = Helper.Dcalculation(pA,pB);
+					maxD = Helper.Dcalculation(pA,pB);
 				}
 			}
 		}

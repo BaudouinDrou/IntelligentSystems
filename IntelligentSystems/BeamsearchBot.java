@@ -30,7 +30,7 @@ public class BeamsearchBot {
 		dest = root.getDest();
 		//While there is still some time, we go through the tree of possibilities
 		while(testIndex < 10){
-			for (int i = 0; i<beam.size();++i){
+			for (int i = 0; i<beam.size();++i){	// Cannot do (MyNode node : beam) because beam is modified with time going on
 				MyNode node = beam.get(i);
 				node.createSons();
 				if (!node.isLeave()){
